@@ -1,0 +1,117 @@
+\documentclass[11pt]{nih}
+
+%%%%%%%%%%%%
+% Packages %
+%%%%%%%%%%%%
+
+% Spacing and layout
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+
+% Math
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{gensymb}
+
+%% Figures
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{boxedminipage}
+
+%% Graphics
+\usepackage{graphicx}
+\usepackage{rotating}
+\usepackage{tikz}
+\usepackage{color}
+
+% Tables
+\usepackage{longtable}
+\usepackage{tabularx}
+
+% Hyperlinks
+\usepackage{url}
+\usepackage[unicode,hidelinks]{hyperref}
+
+% Bibliography
+\usepackage[authoryear,sort]{natbib}
+ 
+% Misc
+\usepackage{enumerate}
+\usepackage{titlesec}
+
+% Chemistry
+\usepackage[version=3]{mhchem}
+
+
+
+%%%%%%%%%%%%
+% Commands %
+%%%%%%%%%%%%
+
+% Math
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\Prob}[1]{\Pr\!\left[\,{#1}\,\right]}
+\newcommand{\ProbC}[2]{\Prob{{#1}\,|\,{#2}}}
+
+% Dense enumeration
+\newenvironment{denseenum}{
+\begin{enumerate}
+\setlength{\itemsep}{0.1em}
+\setlength{\parskip}{0em}
+\setlength{\parsep}{0em}
+}{\end{enumerate}}
+
+
+
+%%%%%%%%%%%%%%
+% Formatting %
+%%%%%%%%%%%%%%
+
+% Spacing between paragraphs, etc.
+\setstretch{1.1}
+\setlength{\parskip}{0.4em plus0em minus0em}
+\setcounter{secnumdepth}{0}
+\setlength{\parindent}{0in}
+\setlength{\itemsep}{0in}
+
+
+\begin{document}
+
+
+%%%%%%%%%
+% Title %
+%%%%%%%%%
+
+\title{\textbf{NIH grant proposal}}
+\author{Douglas Myers-Turnbull, Robin Betz, Yunsup Jung}
+\date{}
+\begin{document}
+\maketitle
+
+
+
+%%%%%%%%%%%%%%%%%
+% Specific aims %
+%%%%%%%%%%%%%%%%%
+
+\section{Specific Aims}
+
+Yay we have specific aims. $\beta$ sheets 'n domain boundries 'n stuff.
+
+
+
+%%%%%%%%%%%%%%%%
+% Bibliography %
+%%%%%%%%%%%%%%%%
+
+\bibliographystyle{plainnat} 
+\bibliography{refs}
+\appendix
+
+
+\end{document}
+
+
