@@ -1,0 +1,109 @@
+; codon frequences for E. coli
+; Maloy, S., V. Stewart, and R. Taylor. 1996. Genetic analysis of pathogenic bacteria. Cold Spring Harbor Laboratory Press, NY.
+; http://www.sci.sdsu.edu/~smaloy/MicrobialGenetics/topics/in-vitro-genetics/codon-usage.html
+
+!F
+UUU	0.51
+UUC	0.49
+
+!L
+UUA	0.11
+UUG	0.11
+CUU	0.10
+CUC	0.10
+CUA	0.03
+CUG	0.55
+
+!I
+AUU	0.47
+AUC	0.46
+AUA	0.07
+
+!M
+AUG	1.00
+
+!V
+GUU	0.29
+GUC	0.20
+GUA	0.17
+GUG	0.34
+
+!S
+UCU	0.19
+UCC	0.17
+UCA	0.12
+UCG	0.13
+AGU	0.13
+AGC	0.27
+
+!P
+CCU	0.16
+CCC	0.10
+CCA	0.20
+CCG	0.55
+
+!T
+ACU	0.21
+ACC	0.43
+ACA	0.30
+ACG	0.23
+
+!A
+GCU	0.19
+GCC	0.25
+GCA	0.22
+GCG	0.34
+
+!Y
+UAU	0.53
+UAC	0.47
+
+!stop
+UAA	0.62
+UAG	0.09
+UGA	0.30
+
+!H
+CAU	0.52
+CAC	0.48
+
+!Q
+CAA	0.31
+CAG	0.69
+
+!N
+AAU	0.39
+AAC	0.61
+
+!K
+AAA	0.76
+AAG	0.24
+
+!D
+GAU	0.59
+GAC	0.41
+
+!E
+GAA	0.70
+GAG	0.30
+
+!C
+UGU	0.43
+UGC	0.57
+
+!W
+UGG	1.00
+
+!R
+CGU	0.42
+CGC	0.37
+CGA	0.05
+CGG	0.08
+AGA	0.04
+AGG	0.03
+
+!G
+GGU	0.38
+GGC	0.40
+GGA	0.09
+GGG	0.13

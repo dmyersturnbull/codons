@@ -27,7 +27,7 @@ public class SimpleCorrelations {
 
 	public static void main(String[] args) throws AnalysisException {
 		DataRetrievalSystem retrieval = new SimpleDataRetrievalSystem();
-		CodonWeightSystem weighter = new SimpleCodonWeightSystem();
+		CodonWeightSystem weighter = SimpleCodonWeightSystem.createForSpecies(Species.E_COLI);
 		SimpleCorrelations corr = new SimpleCorrelations(weighter, retrieval);
 		Evaluation eval = corr.evaluateNearDomainBoundaries(5);
 		System.out.println(eval.getPositiveMeans() + " / " + eval.getNegativeMeans());
@@ -89,6 +89,20 @@ public class SimpleCorrelations {
 		return geneticSequence.substring(nReads * 3, (nReads + 1) * 3);
 	}
 
+//	public Evaluation evaluateByLength() throws AnalysisException {
+//
+//		Evaluation eval = new Evaluation();
+//
+//		DescriptiveStatistics s = new DescriptiveStatistics();
+//		
+//		for (String name : names) {
+//			s.addValue(v);
+//			eval.add(s, s);
+//		}
+//
+//		return eval;
+//	}
+	
 	public Evaluation evaluateNearDomainBoundaries(int nResiduesAround) throws AnalysisException {
 
 		Evaluation eval = new Evaluation();
