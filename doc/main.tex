@@ -5,8 +5,8 @@
 %%%%%%%%%%%%
 
 % Spacing and layout
-\usepackage[margin=1in]{geometry}
-\usepackage[utf8]{inputenc}
+%\usepackage[margin=1in]{geometry}
+%\usepackage[utf8]{inputenc}
 \usepackage{setspace}
 
 % Math
@@ -65,6 +65,17 @@
 }{\end{enumerate}}
 
 
+% TODO notes
+\newcommand{\todo}[1]{
+\addcontentsline{tdo}{todo}{\protect{#1}}
+\textcolor{red}{TODO: #1}
+}
+
+% TODO list
+\makeatletter \newcommand \listoftodos{\section*{\textcolor{red}{Things to do}} \@starttoc{tdo}}
+\newcommand\l@todo[2]
+{\par\noindent \textcolor{red}{\textbf{#2}: \parbox{10cm}{#1}}\par} \makeatother
+
 
 %%%%%%%%%%%%%%
 % Formatting %
@@ -77,8 +88,12 @@
 \setlength{\parindent}{0in}
 \setlength{\itemsep}{0in}
 
+%\titleformat*{\section}{\Huge\bfseries}
+%\titleformat*{\subsection}{\LARGE\bfseries}
+%\titleformat*{\subsubsection}{\large\bfseries}
 
-\begin{document}
+
+
 
 
 %%%%%%%%%
@@ -88,18 +103,125 @@
 \title{\textbf{NIH grant proposal}}
 \author{Douglas Myers-Turnbull, Robin Betz, Yunsup Jung}
 \date{}
+
 \begin{document}
+
 \maketitle
 
+\listoftodos
+
+\tableofcontents
+
+\todo{Disturbingly, there's a bug in the TODOs. Why are they all numbered with `1'?}
+
+
+%%%%%%%%%%%%
+% Abstract %
+%%%%%%%%%%%%
+\section{Abstract}
+
+\subsection{Background}
+\todo{short paragraph introducing codon usage bias}
+
+\subsection{Proposal}
+\todo{2--3 sentences on our proposal}
+
+\subsection{Hypotheses}
+\todo{1 sentence per hypothesis}
+
+
+%%%%%%%%%%%%%
+% Resources %
+%%%%%%%%%%%%%
+\section{Resources}
+\todo{Do we need to do this?}
+
+
+%%%%%%%%%%%%%%%%%%%
+% Author profiles %
+%%%%%%%%%%%%%%%%%%%
+\section{Author profiles}
+\todo{Statement, qualifications for each}
+
+
+%%%%%%%%%%
+% Budget %
+%%%%%%%%%%
+\section{Budget}
+\todo{Do we need to do this?}
+
+\subsection{Budget}
+
+\subsection{Justification}
 
 
 %%%%%%%%%%%%%%%%%
 % Specific aims %
 %%%%%%%%%%%%%%%%%
+\section{Specific aims}
 
-\section{Specific Aims}
+\subsection{Background}
 
-Yay we have specific aims. $\beta$ sheets 'n domain boundries 'n stuff.
+\subsection{Proposal}
+
+\subsection{Aim 1: Develop a comprehensive pipeline to elucidate relationships between codon usage bias and protein structure.}
+
+\subsection{Aim 2: Identify clinically significant effects of synonymous mutations on protein structure.}
+
+\subsection{Aim 3: Establish codon usage bias as an important biological mechanism.}
+
+
+%%%%%%%%%%%%%%%%%%%%%
+% Research strategy %
+%%%%%%%%%%%%%%%%%%%%%
+\section{Research strategy}
+
+
+%%%%%%%%%%%%%%%%
+% Significance %
+%%%%%%%%%%%%%%%%
+\subsection{Significance}
+
+
+
+%%%%%%%%%%%%%%
+% Innovation %
+%%%%%%%%%%%%%%
+\subsection{Innovation}
+
+
+
+%%%%%%%%%%%%
+% Approach %
+%%%%%%%%%%%%
+\subsection{Approach}
+
+%%%%%%%%%%%%%%%%%%%%
+% Preliminary data %
+%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Preliminary data}
+% Justify our hypotheses
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Pipeline development %
+%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Pipeline development}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Assessment of accuracy %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Assessment of accuracy}
+
+%%%%%%%%%%%%%%%%%%%%
+% Clinical studies %
+%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Clinical studies}
+
+%%%%%%%%%%%%%%%%%
+% Folding study %
+%%%%%%%%%%%%%%%%%
+\subsubsection{Folding study}
+
 
 
 
