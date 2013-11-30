@@ -13,6 +13,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+/**
+ * A test for {@link DataRetrievalSystem}.
+ * @author dmyersturnbull
+ */
 @RunWith(Parameterized.class)
 public class DataRetrievalSystemTest {
 

@@ -1,5 +1,10 @@
 package org.beng183.codons;
 
+/**
+ * An error in an evaluation of correlation. A scientific error.
+ * @author dmyersturnbull
+ */
+@SuppressWarnings("serial")
 public class AnalysisException extends Exception {
 
 	public AnalysisException() {

@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A simple {@link CodonWeightSystem} that reads a file (by default, from src/main/resources/frequencies/) to determine codon weights.
+ * @author dmyersturnbull
+ */
 public class SimpleCodonWeightSystem implements CodonWeightSystem {
 
 	private static final String SPECIES_DIR = "src/main/resources/frequencies/";

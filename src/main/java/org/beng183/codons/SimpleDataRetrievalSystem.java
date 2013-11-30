@@ -28,6 +28,11 @@ import org.biojava.bio.structure.scop.ScopDomain;
 import org.biojava3.core.sequence.DNASequence;
 import org.biojava3.core.sequence.io.FastaReaderHelper;
 
+/**
+ * A simple {@link DataRetrievalSystem} that uses Entrez to fetch genetic sequences,
+ * and the UniProt mapping service to map between gene names, PDB identifiers, and domain identifiers.
+ * @author dmyersturnbull
+ */
 public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 
 	private static class ParameterNameValue {

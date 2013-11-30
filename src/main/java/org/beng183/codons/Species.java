@@ -1,5 +1,9 @@
 package org.beng183.codons;
 
+/**
+ * The name of a species.
+ * @author dmyersturnbull
+ */
 public enum Species {
 	
 	E_COLI("E. coli");

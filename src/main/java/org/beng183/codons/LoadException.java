@@ -1,5 +1,10 @@
 package org.beng183.codons;
 
+/**
+ * An error in loading a required resources.
+ * @author dmyersturnbull
+ */
+@SuppressWarnings("serial")
 public class LoadException extends Exception {
 
 	public LoadException() {

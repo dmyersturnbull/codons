@@ -13,6 +13,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+/**
+ * A test for {@link CodonWeightSystem}.
+ * @author dmyersturnbull
+ */
 @RunWith(Parameterized.class)
 public class CodonWeightSystemTest {
 

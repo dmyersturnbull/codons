@@ -23,6 +23,19 @@ import org.biojava.bio.structure.secstruc.SecStrucGroup;
 import org.biojava.bio.structure.secstruc.SecStrucState;
 import org.biojava.bio.structure.secstruc.SecStrucType;
 
+/**
+ * A class to determine the correlation between codon usage bias and something else.
+ * So far, this includes:
+ * <ul>
+ * <li>domain boundaries</li>
+ * <li>α versus β SSEs</li>
+ * <li>sequence length</li>
+ * <li>root mean squared deviation of the residues</li>
+ * </ul>
+ * Methods that evaluate the correlation between codon usage bias and a binary variable output an {@link Evaluation} object to describe the correlation.
+ * @author dmyersturnbull
+ *
+ */
 public class SimpleCorrelations {
 
 	public static void main(String[] args) throws AnalysisException {
@@ -33,13 +46,26 @@ public class SimpleCorrelations {
 		System.out.println(eval.getPositiveMeans() + " / " + eval.getNegativeMeans());
 	}
 	
+	/**
+	 * A description of the correlation between codon usage bias and a binary variable.
+	 * @author dmyersturnbull
+	 */
 	public static class Evaluation {
+		
+		// each pair is indexed by (positive, negative) (which is (true, false))
 		List<Pair<DescriptiveStatistics, DescriptiveStatistics>> stats = new ArrayList<>();
 
 		void add(DescriptiveStatistics positive, DescriptiveStatistics negative) {
 			stats.add(new Pair<DescriptiveStatistics, DescriptiveStatistics>(positive, negative));
 		}
 
+		/**
+		 * Returns statistics about the <em>means</em> of the <em>negative</em> proteins
+		 * For example, if "positive" is β-sheet and "negative" is α-helix of n proteins,
+		 * this will return statistics of the n-dimensional vector containing the
+		 * <em>mean codon usage bias</em> for each protein. The mean for a protein x is the
+		 * mean codon usage bias among α-helical residues.
+		 */
 		public DescriptiveStatistics getNegativeMeans() {
 			DescriptiveStatistics means = new DescriptiveStatistics();
 			for (Pair<DescriptiveStatistics, DescriptiveStatistics> pair : stats) {
@@ -48,6 +74,13 @@ public class SimpleCorrelations {
 			return means;
 		}
 
+		/**
+		 * Returns statistics about the <em>standard deviations</em> of the <em>negative</em> proteins
+		 * For example, if "positive" is β-sheet and "negative" is α-helix of n proteins,
+		 * this will return statistics of the n-dimensional vector containing the
+		 * <em>standard deviation of codon usage bias</em> for each protein. The standard deviation
+		 * for a protein x is the standard deviation of codon usage bias among α-helical residues.
+		 */
 		public DescriptiveStatistics getNegativeStandardDeviations() {
 			DescriptiveStatistics means = new DescriptiveStatistics();
 			for (Pair<DescriptiveStatistics, DescriptiveStatistics> pair : stats) {
@@ -56,6 +89,9 @@ public class SimpleCorrelations {
 			return means;
 		}
 
+		/**
+		 * @see #getNegativeMeans()
+		 */
 		public DescriptiveStatistics getPositiveMeans() {
 			DescriptiveStatistics means = new DescriptiveStatistics();
 			for (Pair<DescriptiveStatistics, DescriptiveStatistics> pair : stats) {
@@ -64,6 +100,9 @@ public class SimpleCorrelations {
 			return means;
 		}
 
+		/**
+		 * @see #getNegativeStandardDeviations()
+		 */
 		public DescriptiveStatistics getPositiveStandardDeviations() {
 			DescriptiveStatistics means = new DescriptiveStatistics();
 			for (Pair<DescriptiveStatistics, DescriptiveStatistics> pair : stats) {
@@ -85,6 +124,9 @@ public class SimpleCorrelations {
 		this.retrieval = retrievalSystem;
 	}
 
+	/**
+	 * Returns the {@code nRead}th codon’s 3-letter code.
+	 */
 	private String getCodon(String geneticSequence, int nReads) {
 		return geneticSequence.substring(nReads * 3, (nReads + 1) * 3);
 	}
@@ -103,8 +145,22 @@ public class SimpleCorrelations {
 //		return eval;
 //	}
 	
+	/**
+	 * Evaluates codon usage bias between two classes:
+	 * <ul>
+	 * <li>Residues within a sequence distance of nResiduesAround from any domain boundary, inclusive (positive), and</li>
+	 * <li>Residues outside of a sequence distance of nResiduesAround from any domain boundary (negative)</li>
+	 * </ul>
+	 * @param nResiduesAround
+	 * @return An Evaluation object, with "positive" being near domain boundaries, and "negative" being outside
+	 * @throws AnalysisException
+	 */
 	public Evaluation evaluateNearDomainBoundaries(int nResiduesAround) throws AnalysisException {
 
+		if (names == null) {
+			throw new IllegalArgumentException("Must set names first");
+		}
+		
 		Evaluation eval = new Evaluation();
 
 		for (String name : names) {
@@ -153,12 +209,30 @@ public class SimpleCorrelations {
 		return eval;
 	}
 
+	/**
+	 * Sets the list of gene identifiers to run on.
+	 * <strong>Must be called before any evaluation.</strong>
+	 */
 	public void setNames(List<String> names) {
 		this.names = names;
 	}
 
+	/**
+	 * Evaluates codon usage bias between two classes:
+	 * <ul>
+	 * <li>Residues within β-sheets (positive), and</li>
+	 * <li>Residues within other residues (negative)</li>
+	 * </ul>
+	 * @param nResiduesAround
+	 * @return An Evaluation object, with "positive" within β-sheets, and "negative" being not within β-sheets
+	 * @throws AnalysisException
+	 */
 	public Evaluation evaluateWithinBetaSheets() throws AnalysisException {
 
+		if (names == null) {
+			throw new IllegalArgumentException("Must set names first");
+		}
+		
 		Evaluation eval = new Evaluation();
 
 		for (String name : names) {
