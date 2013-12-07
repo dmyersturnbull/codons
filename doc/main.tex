@@ -35,7 +35,7 @@
 \usepackage[unicode,hidelinks]{hyperref}
 
 % Bibliography
-\usepackage[authoryear,sort]{natbib}
+\usepackage[numbers,sort]{natbib}
  
 % Misc
 \usepackage{enumerate}
@@ -118,41 +118,41 @@
 %%%%%%%%%%%%
 % Abstract %
 %%%%%%%%%%%%
-\section{Abstract}
+%\section{Abstract}
 
-\subsection{Background}
-\todo{short paragraph introducing codon usage bias}
+%\subsection{Background}
+%\todo{short paragraph introducing codon usage bias}
 
-\subsection{Proposal}
-\todo{2--3 sentences on our proposal}
+%\subsection{Proposal}
+%\todo{2--3 sentences on our proposal}
 
-\subsection{Hypotheses}
-\todo{1 sentence per hypothesis}
+%\subsection{Hypotheses}
+%\todo{1 sentence per hypothesis}
 
 
 %%%%%%%%%%%%%
 % Resources %
 %%%%%%%%%%%%%
-\section{Resources}
-\todo{Do we need to do this?}
+%\section{Resources}
+%\todo{Do we need to do this?}
 
 
 %%%%%%%%%%%%%%%%%%%
 % Author profiles %
 %%%%%%%%%%%%%%%%%%%
-\section{Author profiles}
-\todo{Statement, qualifications for each}
+%\section{Author profiles}
+%\todo{Statement, qualifications for each}
 
 
 %%%%%%%%%%
 % Budget %
 %%%%%%%%%%
-\section{Budget}
-\todo{Do we need to do this?}
+%\section{Budget}
+%\todo{Do we need to do this?}
 
-\subsection{Budget}
+%\subsection{Budget}
 
-\subsection{Justification}
+%\subsection{Justification}
 
 
 %%%%%%%%%%%%%%%%%
@@ -160,18 +160,32 @@
 %%%%%%%%%%%%%%%%%
 \section{Specific aims}
 
+% isoaccepting tRNAs
+
 \subsection{Background}
+
+% Douglas: This is a first draft that can be expanded.
+% Douglas: Some of this an be expanded in the research strategy section, either under significance or under "data supporting" or something like that
+
+It is known that codon usage bias correlates with expression levels \citep{Goetz2005,Gustafsson2004}. There are strong indications that abundance of isoaccepting tRNA molecules \citep{Klumpp2012,Plotkin2011,Najafabadi2007,Tavare1989} is a causal factor of this differential expression. Specifically, proteins with high expression levels have been found to contain greater levels of commonly used codons, and frequently used codons are associated with higher levels of corresponding tRNAs. Thus there is believed to be a positive selection for a small, constrained set of codon--tRNA combinations, and concentrations of codons and tRNAs are related in a positive feedback cycle, where bias in either causes a positive selection for bias in the other. Because of this strong correlation, we call infrequently used codons \emph{slow}, and frequently used codons \emph{fast}, except in cases where we address this correlation directly. Furthermore, we consider sequences containing a large proportion of frequently used codons to have high \emph{codon usage bias}, and sequences containing either a moderate or low proportion to be \emph{unbiased}, even though sequences with low proportion still deviate from the statistical mean.
+
+There is also substantial evidence that translation dynamics is responsible for some of this correlation \citep{Bentele2013,Mitarai2013,Cannarozzi2010,Fredrick2010,Marin2008,Buchan2007}. Factors including mRNA secondary structure, mRNA stability \citep{Gu2010}, and codon--tRNA affinity have been suggested. Most notably, these investigations have shown that ribosomal traffic is an important factor affecting codon usage bias. For efficient translation, overall codon usage should be skewed in favor of frequent (fast) codons, and there should be a gradient in which slow codons are prevalent at the beginning of the transcript but rare high toward the middle and end. \citet{Mitarai2013} used a simple computational model to show that the introduction of even a single slow codon near the end of the transcript can cause ribosomal traffic jams that drastically decrease translation speed.
+
+Because slow codons can cause pauses in translation, it has been suggested that such pauses can influence protein folding, leading to different folded states for transcripts with differing synonymous codon usage \cite{Komar2009,Zhang2009,Buchan2007}.
+Many studies have found that codon usage bias is correlated to protein structure \citep{Saunders2010,Biro2006,Adzhubei1996,Gu2003}, including secondary structure \citep{Oresic2003,Gu2003} and domain organization \citep{Gu2004,Oresic2003}. More suprising is the recent demonstration by \citet{Zhou2013} that differential codon usage can directly alter the folded state of a protein product. Zhou et al. changed the folded state of the circadian rhythm protein FRQ by introducing synonymous mutations.
 
 \subsection{Proposal}
 
-We intend to identify causal relationships of codon usage bias and point mutations on protein structure.
+In general, the bioinformatics studies by \citet{Saunders2010,Biro2006,Adzhubei1996,Gu2003} controlled for very few variables and were able to identify only a few clear correlations, particularly between codon usage bias and protein secondary structure. However, we hypothesize that these results were negative because the effects of codon usage bias on protein structure are minor or nonexistent for most proteins. However, as shown by \citet{Zhou2013}, differential codon usage can dramatically affect the folding of certain proteins, and some of these, including FRQ, may be clinically important. Therefore, we further hypothesize that general mechanisms exist even if few general correlations do, and that controlling for more variables will allow us to elucidate general mechanisms.
 
-\subsection{Aim 1: Develop a comprehensive pipeline to elucidate relationships between codon usage bias and protein structure.}
+We propose a large-scale bioinformatics study to identify causal relationships in which synonymous codon usage affects protein structure. To address the negative results of the studies by \citet{Saunders2010,Biro2006,Adzhubei1996,Gu2003}, we intend to address causal relationships rather than correlations by developing a mathematically and statistically rigorous framework, which we will use to address the problem of weak signals.
+
+\subsection{Aim 1: Develop a comprehensive, verifiable, and rigorous pipeline to elucidate relationships between codon usage bias and protein structure.}
 
 \subsection{Aim 2: Identify clinically significant effects of synonymous mutations on protein structure.}
 
 \subsection{Aim 3: Establish codon usage bias as an important biological mechanism.}
-
+ 
 
 %%%%%%%%%%%%%%%%%%%%%
 % Research strategy %
@@ -223,7 +237,7 @@ We intend to identify causal relationships of codon usage bias and point mutatio
 % Folding study %
 %%%%%%%%%%%%%%%%%
 \subsubsection{Folding study}
-
+As an auxillary study, we will investigate the effects of synonymous mutations in detail for select cases using MD-based folding software. Although de novo folding is still largely unsolved, and de novo folding algorithms are still in their infancy, such an investigation may still reveal insight for some cases that is unavailable through other means. \cite{Zhang:2008p3335}  
 
 
 
