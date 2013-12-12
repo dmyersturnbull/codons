@@ -6,7 +6,7 @@ package org.beng183.codons;
  */
 public enum Species {
 	
-	E_COLI("E. coli");
+	E_COLI("E. coli"), S_CEREVISIAE("S. cerevisiae");
 	
 	private final String name;
 

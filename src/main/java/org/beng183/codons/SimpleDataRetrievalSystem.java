@@ -56,6 +56,14 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 
 	private static String run(String tool, ParameterNameValue[] params) throws LoadException {
 
+		StringBuilder message = new StringBuilder("[");
+		for (int i = 0; i < params.length; i++) {
+			message.append(params[i].name + "=" + params[i].value);
+			if (i < params.length - 1) message.append("; ");
+		}
+		message.append("]");
+		logger.debug("Query " + tool + " with " + message);
+
 		StringBuilder locationBuilder = new StringBuilder(UNIPROT_SERVER + tool + "/?");
 		for (int i = 0; i < params.length; i++) {
 			if (i > 0) locationBuilder.append('&');
@@ -69,7 +77,7 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 		} catch (MalformedURLException e) {
 			throw new LoadException(e);
 		}
-		
+
 		HttpURLConnection conn = null;
 
 		try {
@@ -78,7 +86,7 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 			conn = (HttpURLConnection) url.openConnection();
 			HttpURLConnection.setFollowRedirects(true);
 			conn.setDoInput(true);
-			logger.debug("Connecting...");
+			logger.trace("Connecting...");
 			conn.connect();
 
 			// wait for a response
@@ -88,7 +96,7 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 				String header = conn.getHeaderField("Retry-After");
 				if (header != null) wait = Integer.valueOf(header);
 				if (wait == 0) break;
-				logger.debug("Waiting (" + wait + ")...");
+				logger.trace("Waiting (" + wait + ")...");
 				conn.disconnect();
 				Thread.sleep(wait * 1000);
 				conn = (HttpURLConnection) new URL(location).openConnection();
@@ -98,7 +106,7 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 			}
 
 			if (status == HttpURLConnection.HTTP_OK) {
-				logger.debug("Received HTTP 200.");
+				logger.trace("Received HTTP 200.");
 				InputStream stream = conn.getInputStream();
 				URLConnection.guessContentTypeFromStream(stream);
 				StringBuilder sb = new StringBuilder();
@@ -137,14 +145,24 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 
 	@Override
 	public List<ScopDomain> getDomainsFromGeneName(String name) throws LoadException {
+		logger.info("Finding domains for gene " + name + "...");
 		String pdbId = getPdbIdFromEntrezId(name);
 		if (pdbId == null) throw new LoadException("Gene " + name + " not found");
-		return scop.getDomainsForPDB(pdbId);
+		List<ScopDomain> domains = scop.getDomainsForPDB(pdbId);
+		StringBuilder message = new StringBuilder();
+		for (int i = 0; i < domains.size(); i++) {
+			message.append(domains.get(i).getScopId());
+			if (i < domains.size() - 1) message.append(", ");
+		}
+		logger.info("Found scop Ids " + message.toString() + " for gene " + name);
+		return domains;
 	}
 
 	@Override
 	public String getGeneticSequenceFromName(String name) throws LoadException {
-		
+
+		logger.info("Retrieving sequence for gene " + name + "...");
+
 		if (geneToSequence.containsKey(name)) {
 			String ans = geneToSequence.get(name).get();
 			if (ans != null) return ans;
@@ -158,7 +176,7 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 				new ParameterNameValue("to", "REFSEQ_NT_ID"), new ParameterNameValue("format", "tab"),
 				new ParameterNameValue("query", uniProtId) });
 		String id = parse(refseqData);
-		
+
 		// http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=34577062,24475906&rettype=fasta&retmode=text
 		URL url;
 		try {
@@ -184,6 +202,7 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 		if (!iterator.hasNext()) throw new LoadException("Did not find a sequence for gene with name " + name);
 		String sequence = iterator.next().getSequenceAsString();
 		geneToSequence.put(name, new WeakReference<String>(sequence));
+		logger.info("Found sequence of length " + sequence.length() + " for gene " + name);
 		return sequence;
 	}
 
@@ -192,13 +211,22 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 		String uniProtIdData = run("mapping", new ParameterNameValue[] { new ParameterNameValue("from", "P_ENTREZGENEID"),
 				new ParameterNameValue("to", "ID"), new ParameterNameValue("format", "tab"),
 				new ParameterNameValue("query", name) });
-		String uniProtId = parse(uniProtIdData);
+		String uniProtId;
+		try {
+			uniProtId = parse(uniProtIdData);
+		} catch (LoadException e) {
+			throw new LoadException("Couldn't get UniProt Id from [" + uniProtIdData + "] for gene " + name);
+		}
 		String pdbIdData = run("mapping", new ParameterNameValue[] { new ParameterNameValue("from", "ACC+ID"),
 				new ParameterNameValue("to", "PDB_ID"), new ParameterNameValue("format", "tab"),
 				new ParameterNameValue("query", uniProtId) });
-		String pdbId = parse(pdbIdData);
+		String pdbId;
+		try {
+			pdbId = parse(pdbIdData);
+		} catch (LoadException e) {
+			throw new LoadException("Couldn't get PDB Id from [" + pdbIdData + "] for gene " + name + " (from UniProtId " + uniProtId + ")");
+		}
 		geneToPdbId.put(name, pdbId);
-		System.out.println(pdbId);
 		return pdbId;
 	}
 
@@ -212,13 +240,17 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 
 	@Override
 	public Structure getStructureFromGeneName(String name) throws LoadException {
+		logger.info("Finding PDB structure for gene " + name + "...");
 		String pdbId = getPdbIdFromEntrezId(name);
 		if (pdbId == null) throw new LoadException("Gene " + name + " not found");
+		Structure structure = null;
 		try {
-			return cache.getStructure(pdbId);
+			structure = cache.getStructure(pdbId);
 		} catch (IOException | StructureException e) {
 			throw new LoadException("Couldn't load structure from PDB Id" + pdbId, e);
 		}
+		logger.info("Found PDB Id " + structure.getPDBCode() + " for gene " + name);
+		return structure;
 	}
 
 }

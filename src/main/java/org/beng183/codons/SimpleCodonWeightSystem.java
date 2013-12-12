@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * A simple {@link CodonWeightSystem} that reads a file (by default, from src/main/resources/frequencies/) to determine codon weights.
  * @author dmyersturnbull
@@ -17,7 +20,9 @@ public class SimpleCodonWeightSystem implements CodonWeightSystem {
 	private static final String SPECIES_FILENAME_EXTENSION = ".codons";
 	
 	public static final String E_COLI = "E. coli";
-	
+
+	private static final Logger logger = LogManager.getLogger(SimpleCodonWeightSystem.class.getName());
+
 	private Map<String,Double> map;
 	
 	public static SimpleCodonWeightSystem createForSpecies(String speciesName) {
@@ -34,11 +39,12 @@ public class SimpleCodonWeightSystem implements CodonWeightSystem {
 			String aminoAcid = "";
 			String line = "";
 			while ((line = br.readLine()) != null) {
-				if (line.isEmpty()) continue;
+				if (line.trim().isEmpty()) continue;
 				line = line.trim();
 				if (line.startsWith(";")) continue;
 				if (line.startsWith("!")) {
-					aminoAcid = line.trim();
+					aminoAcid = line.replace("!", "").trim();
+					logger.info("Amino acid " + aminoAcid);
 				} else {
 					if (!map.containsKey(aminoAcid)) map.put(aminoAcid, new HashMap<String,Double>());
 					String[] parts = line.split("\t");
@@ -48,6 +54,25 @@ public class SimpleCodonWeightSystem implements CodonWeightSystem {
 			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException("Couldn't read file " + file, e);
+		}
+		
+		// sanity checks
+		if (map.size() != 21) {
+			logger.warn(map.size() + " amino were found (including stop codons, should be 21)");
+		}
+		int x = 0;
+		for (Map.Entry<String,Map<String,Double>> entry : map.entrySet()) {
+			x += entry.getValue().size();
+			double pSum = 0;
+			for (double p : entry.getValue().values()) pSum += p;
+			if (Math.abs(pSum - 1.0) > 0.01) {
+				logger.warn("Codon values for " + entry.getKey() + " sum to " + pSum);
+			}
+		}
+		if (x < 4*4*4) {
+			logger.warn("Only " + x + " codons were found");
+		} else if (x > 4*4*4) {
+			logger.warn("Too many (" + x + ") codons were found");
 		}
 		
 		// normalize by amino acid
@@ -73,6 +98,7 @@ public class SimpleCodonWeightSystem implements CodonWeightSystem {
 
 	@Override
 	public double getCodonWeight(String codon) {
+		codon = codon.replaceAll("T", "U").toUpperCase();
 		if (!map.containsKey(codon)) throw new IllegalArgumentException("Codon " + codon + " does not exist");
 		return map.get(codon);
 	}

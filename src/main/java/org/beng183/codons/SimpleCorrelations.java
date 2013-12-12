@@ -1,5 +1,11 @@
 package org.beng183.codons;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,14 +49,24 @@ import org.biojava.bio.structure.secstruc.SecStrucType;
  */
 public class SimpleCorrelations {
 
-	public static void main(String[] args) throws AnalysisException {
+	public static void main(String[] args) throws AnalysisException, IOException {
+		if (args.length != 1) {
+			System.err.println("Usage: " + SimpleCorrelations.class.getSimpleName() + " list-of-ids-file");
+			return;
+		}
+		logger.info("Initializing data retrieval system");
 		DataRetrievalSystem retrieval = new SimpleDataRetrievalSystem();
-		CodonWeightSystem weighter = SimpleCodonWeightSystem.createForSpecies(Species.E_COLI);
+		logger.info("Initializing codon weight system");
+		CodonWeightSystem weighter = SimpleCodonWeightSystem.createForSpecies(Species.S_CEREVISIAE);
+		logger.info("Initializing correlations-finder");
 		SimpleCorrelations corr = new SimpleCorrelations(weighter, retrieval);
+		logger.info("Parsing gene identifiers");
+		corr.setNames(new File(args[0]));
+		logger.info("Evaluating domain boundaries");
 		Evaluation eval = corr.evaluateNearDomainBoundaries(5);
 		System.out.println(eval.getPositiveMeans() + " / " + eval.getNegativeMeans());
 	}
-
+	
 	/**
 	 * An object that calculates a numerical value from a structure.
 	 * This value can then be correlated against the total codon weight of the sequence.
@@ -222,7 +238,7 @@ public class SimpleCorrelations {
 		if (names == null) {
 			throw new IllegalArgumentException("Must set names first");
 		}
-
+		
 		Evaluation eval = new Evaluation();
 
 		for (String name : names) {
@@ -236,7 +252,10 @@ public class SimpleCorrelations {
 				Structure structure = retrieval.getStructureFromGeneName(name);
 				Atom[] ca = StructureTools.getAtomCAArray(structure);
 				List<ScopDomain> domains = retrieval.getDomainsFromGeneName(name);
-				if (domains.size() < 2) continue;
+				if (domains.size() < 2) {
+					logger.info("Skipping " + name + " because only " + domains.size() + " domain(s) were found");
+					continue;
+				}
 
 				for (ScopDomain domain : domains) {
 
@@ -259,9 +278,10 @@ public class SimpleCorrelations {
 							}
 						}
 					}
-
+					
 				}
 
+				logger.info("For gene " + name + ": bias near boundaries is " + String.format("%1$.4f", positive.getMean()) + ", bias outside is " + String.format("%1$.4f", negative.getMean()));
 				eval.add(positive, negative);
 
 			} catch (Exception e) {
@@ -274,6 +294,24 @@ public class SimpleCorrelations {
 	/**
 	 * Sets the list of gene identifiers to run on.
 	 * <strong>Must be called before any evaluation.</strong>
+	 * @param file A file containing a line-by-line list of gene identifiers
+	 * @throws IOException 
+	 * @see #setNames(List)
+	 */
+	public void setNames(File file) throws IOException {
+		names = new ArrayList<>();
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+			String line = "";
+			while ((line = br.readLine()) != null) {
+				if (!line.isEmpty() && !line.startsWith(";")) names.add(line);
+			}
+		}
+	}
+
+	/**
+	 * Sets the list of gene identifiers to run on.
+	 * <strong>Must be called before any evaluation.</strong>
+	 * @see #setNames(File)
 	 */
 	public void setNames(List<String> names) {
 		this.names = names;
