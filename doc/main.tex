@@ -226,7 +226,7 @@ We are currently interested in several hypotheses and open questions:
 \item \textbf{Secondary structure}
 Are particular secondary structural elements (SSEs) enriched for slow codons? Are the transitions between SSEs, in agreement with \citet{Saunders2010}, enriched for slow codons?
 
-To investigate this hypothesis, we will use Define Secondary Structure of Proteins (DSSP) [,] to identify putative SSEs. Although DSSP is currently outperformed in accuracy by sophisticated machine learning methods, the use of machine learning algorithms such as PROTEUS presents significant pitfalls in performing statistical analysis because decisions by the classifier depend on the training data, and individual classification decisions are unstable subject to arbitrary bounds. Because our methodology depends so heavily on such analysis to improve overall sensitivity, we consider this loss of statistical rigor unacceptable.
+To investigate this hypothesis, we will use Define Secondary Structure of Proteins (DSSP) \citep{Joosten2011,Kabsch1983} to identify SSEs. Although DSSP is currently outperformed in accuracy by sophisticated machine learning methods, the use of machine learning algorithms such as PROTEUS presents significant pitfalls in performing statistical analysis because decisions by the classifier depend on the training data, and individual classification decisions are unstable subject to arbitrary bounds. Because our methodology depends so heavily on such analysis to improve overall sensitivity, we consider this loss of statistical rigor unacceptable.
 
 We will first attempt to verify the results of \citet{Saunders2010} by duplicating their approach. Specifically, we will calculate the distribution of codon usage bias within helices, strands, and coils.We will apply a Mantel--Haenszel and a $\chi^2$-test to determine significance between the categories. Secondly, we select 2--5 large data sets (at least 2,000 genes each), and expand the categories to also include, at a minimum, $3_{10}$-helices, $\beta$-helices, and $\pi$-helices. We will also distinguish between $\beta$-sheets and isolated $\beta$-strands. We will then determine significance using the same statistical techniques.
 
@@ -249,11 +249,11 @@ Due to the complexity of the energy funnels for the folding of many proteins \ci
 
 We also conjecture that knotted proteins are enriched for slow codons, and that codon usage bias is inversely correlated with the complexity of the knot. To investigate these hypotheses, we will identify knots using the existing algorithms by \citet{Lai2012,Virnau2006}. Although neither algorithm can detect all knots, we argue that this is sufficient for our purposes.
 
-Knots are classified up to isomorphism by the Jones polynomial, a knot invariant that revolutionized knot theory in part because it is easy to compute. It is defined in terms of a projection $D$ of a knot $K$ by:\\
+Knots are classified up to isomorphism by the Jones polynomial \cite{Jones2005}, a knot invariant that revolutionized knot theory in part because it is easy to compute. It is defined in terms of an arbitrary projection $D$ of a knot $K$ by:\\
 \begin{equation}
-X(K) = (-A^3)^{-w(K)}\langle L \rangle
+f_D(A) = (-A^3)^{-w(D)}\langle D \rangle
 \end{equation}
-where $w(K)$ is the writhe of $K$.
+where $w(D)$ is the writhe of the diagram $D$, and $\langle D\rangle$ is its Kauffman bracket.
 
 The result of the computation is a Laurent polynomial that uniquely identifies the knot. Moreover, the number of terms in the Laurent polynomial and its coefficients can be used to define a complexity $\xi(K)$ of the knot. We hypothesize that the knot complexity $\xi$ is associated with the CAI of a gene.
 
@@ -268,7 +268,26 @@ where $A$ is a single protein, and $||R - S||_2$ is the two-norm of the differen
 \end{enumerate}
 \todo{Fill in when run finishes [Douglas]}
 
-In the case of structural complexity, we are interested in statistical associations that are potentially nonlinear. For this purpose we will use the Hilbert--Schmidt norm \cite{Song2012} \cite{Song2012a} \todo{Finish this paragraph [Douglas]} 
+In the case of structural complexity, we are interested in statistical associations that are potentially nonlinear. For this purpose we will use the Hilbert--Schmidt Independence Criterion (HSIC) \cite{Song2012} to identify statistical associations, both linear and nonlinear.
+
+The HSIC is a statistical test defined using a generalization of the Frobenius norm for linear operators called
+
+The Hilbert--Schmidt (HS) norm is an operator norm defined for an arbitrary operator $C: G \rightarrow F$:
+
+: for an operator $C: G \rightarrow F$, where $G$ and $F$ are required only to be orthonormal bases of separable Hilbert spaces.
+\begin{equation}
+||C||_{HS}^2 = \displaystyle \sum_{i,j} \langle C \nu_i, \mu_j \rangle_F^2
+\end{equation}
+where $\nu$ and $\mu$ are orthonormal bases of $F$ and $G$. The HS norm is extremely similar to the Frobenius norm for matrices. However, the generalization permits its use for arbitrary operators rather than only linear operators (specifically, the only requisite is that $F$ and $G$ are Hilbert spaces).
+A cross-covariance operator $C_{xy}$ is then defined [], and the HSIC is defined as:
+\begin{equation}
+HSIC(p_{xy}, F, G) := ||C_{x,y}||_{HS}^2
+\end{equation}
+\cite{Song2012}
+
+The advantage of this method is that it permits the determination of nonlinear associations without the use of a kernel trick or artificial regularization. This should allow us to identify potential relationships between protein complexity and codon usage bias in a manner that is sensitive and statistically robust, and that does not depend on an arbitrary selection of kernels or regularization terms.
+
+\cite{Song2012a} \todo{Finish this paragraph [Douglas]} 
 
 
 %\item \textbf{Solvent accessibility and oligomeric assembly}
