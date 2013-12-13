@@ -64,21 +64,22 @@ public class SimpleCorrelations {
 		logger.info("Parsing gene identifiers");
 		corr.setNames(new File(args[0]));
 
-		printHeader("domains");
-		Evaluation domains = corr.evaluateNearDomainBoundaries(5);
-		System.out.println(domains);
+//		printHeader("domains");
+//		Evaluation domains = corr.evaluateNearDomainBoundaries(5);
+//		System.out.println(domains);
 
-		printHeader("strands");
-		Evaluation strands = corr.evaluateWithinBetaSheets();
-		System.out.println(strands);
+//		printHeader("strands");
+//		Evaluation strands = corr.evaluateWithinBetaSheets();
+//		System.out.println(strands);
+
+		printHeader("sparseness");
+		RealMatrix sparseness = corr.correlateSparseness();
+		System.out.println(printMatrix(sparseness));
 
 		printHeader("length");
 		RealMatrix length = corr.correlateLength();
 		System.out.println(printMatrix(length));
 
-		printHeader("sparseness");
-		RealMatrix sparseness = corr.correlateSparseness();
-		System.out.println(printMatrix(sparseness));
 	}
 
 	/**
@@ -235,7 +236,7 @@ public class SimpleCorrelations {
 				}
 
 				calculatedValue[x] = calculator.calculate(structure, ca, geneticSequence);
-				weights[x] = sumWeight(geneticSequence);
+				weights[x] = sumWeight(geneticSequence) / (geneticSequence.length() / 3);
 
 			} catch (Exception e) {
 				logger.error(e);
@@ -432,7 +433,7 @@ public class SimpleCorrelations {
 				total += Calc.getDistanceFast(ca1[i], ca2[j]);
 			}
 		}
-		return Math.sqrt(total) / ca1.length;
+		return Math.sqrt(total) / ca1.length / ca1.length;
 	}
 
 	/**
@@ -462,6 +463,7 @@ public class SimpleCorrelations {
 		for (int i = 0; i < matrix.getRowDimension(); i++) {
 			for (int j = 0; j < matrix.getColumnDimension(); j++) {
 				sb.append((String.format("%1$6.4f", matrix.getEntry(i, j))));
+				sb.append("\t");
 			}
 			sb.append(System.getProperty("line.separator"));
 		}
@@ -469,7 +471,7 @@ public class SimpleCorrelations {
 	}
 	
 	private static void printHeader(String name) {
-		System.out.println(repeat(System.getProperty("line.separator"), 4));
+		System.out.println(repeat(System.getProperty("line.separator"), 10));
 		System.out.println(repeat("-", 80));
 		System.out.println(repeat("-", 40 - name.length()/2) + name + repeat("-", 40 - name.length()/2));
 		System.out.println(repeat("-", 80));

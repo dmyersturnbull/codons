@@ -120,8 +120,7 @@
 
 % isoaccepting tRNAs
 
-We propose a large-scale bioinformatics study to identify the effects of synonymous codon usage on protein structure. We intend to address causal relationships rather than statistical associations by developing a mathematically and statistically rigorous framework, which we will use to address a number of hypotheses. \todo{Write a little more here.}
-[Robin]
+We propose a large-scale bioinformatics study to identify the effects of synonymous codon usage on protein structure. We intend to address causal relationships rather than statistical associations by developing a mathematically and statistically rigorous framework, which we will use to address a number of hypotheses. 
 
 \subsection{Aim 1: Develop a comprehensive, verifiable, and rigorous framework to elucidate relationships between codon usage bias and protein structure.}
 We will develop a mathematical and computational framework that will allow the robust detection of relationships between codon usage and variables describing protein structure, even when the overall statistical correlation between the two variables is low.
@@ -194,16 +193,31 @@ In addition, the previous studies were partly unsuccessful in establishing even 
 %%%%%%%%%
 \subsection{Aim 1}
 
-\subsubsection{Data sets}
+\subsubsection{Determination of causation}
+Ultimately, we are interested in causation related to codon usage bias. The analyses described above are independently useful, both for novel findings and verification of previous results. While we argue that such results are interesting, biologically relavent, and warrant further investigation, they may indicate only indirect correlations. It is entirely possible for one variable to account for another in whole or in part; for example, domain boundaries may be enriched for slow codons only because they contain more strands than helices, or that solvent accessibility around domain boundaries may be the more fundamental explanation.
 
-To map between protein structures and genetic sequences, we will use RefSeq [] and PDBSWS by \cite{Martin2005}.
 
-We will apply these methods to 5--10 species-dependent data sets, including eukaryotes, invertibrates, and Homo sapiens. We will necessarily limit the data sets to contain only genes annotated with structures in the Protein Data Bank (PDB) \citep{pdb}.
+\subsection{Data sets}
 
-The content of databases that permit public deposition of entries, such as the NCBI and the PDB, are significantly biased toward sequences and structures that are of experimental interest. To control for such bias, we will perform two normalization steps prior to analysis:
-\begin{enumerate}[a)]
-\item Perform sequence clustering
-\end{enumerate}
+We primarily aim to investigate the relationship between secondary structural elements (SSEs) and slow codons, with the aim of finding biases towards slow codon enrichment in certain elements. The null hypothesis for this situation is that there is no meaningful relationship between frequency of slow codons and domain features. However, we hypothesize that such a relationship does exist, as previous research indicates the introduction or removal of slow codons has a dramatic effect on protein expression.
+
+We will construct 5--10 species-dependent data sets, covering eukaryotes, invertibrates, and Homo sapiens. Using more than 1 data set will allow us to control for inter-species variation. We will necessarily limit the data sets to contain only genes annotated with structures in the Protein Data Bank (PDB) \citep{pdb}.
+
+The content of databases that permit public deposition of entries, such as the NCBI and the PDB, are significantly biased toward sequences and structures that are of experimental interest. To control for such bias, we will cluster the genes by alignments using Basic Local Alignment Tool (BLAST) [] pairwise, then clustering by 40\% sequence identity to remove homologs.
+
+Coding mRNA sequences for the protein will be obtained from the NCBI Reference Sequence Database (RefSeq) \citep{refseq}. Sequences will be correlated to structures by means of Structure Integration with Function, Taxonomy, and Sequence (SIFTS) database \citep{sifts}.
+
+\subsection{Quantification of bias}
+Bias towards fast or slow codons in mRNA sequence will be established using the codon adaptation index (CAI) described by \citet{sharp1987codon}. Codons are assigned weights depending on the frequency of their corresponding tRNA in the appropriate organism:
+\begin{equation}
+w_{ij} = \frac{X_{ij}}{X_{i^*}}
+\end{equation}
+
+The codon usage bias in a particular region is then the geometric mean of the codons that comprise it:
+\begin{align}
+CAI &= (\displaystyle \prod_{k=1}^L w_k )^{\frac{1}{L}} \\
+&= \exp(\frac{1}{L} \displaystyle \sum_{k=1}^L \log w_k)
+\end{align}
 
 
 \subsubsection{Hypotheses}
@@ -218,49 +232,90 @@ We will first attempt to verify the results of \citet{Saunders2010} by duplicati
 
 To address the second part of this question, we will calculate codon usage bias around the transitions between SSEs, using windows of 0, 1, 2, 4, and 6 residues.
 
-\textbf{Preliminary data:} In addition to the work by \citet{Saunders2010,Oresic2003,Gu2003,Thanaraj1996a}, we  investigated the hypothesis that strands are enriched for slow codons on a novel data set of 437 S. cerevisiae genes annotated by sturctures in the PDB. The results showed that \todo{something}.
+\textbf{Preliminary data:} The research by \citet{Saunders2010,Oresic2003,Gu2003,Thanaraj1996a} all found statistically significant correlations between codon usage bias and protein secondary structure.
+%we  investigated the hypothesis that strands are enriched for slow codons on a novel data set of 437 S. cerevisiae genes annotated by sturctures in the PDB. The results showed that \todo{something}.
 
 \item \textbf{Domain boundaries}
 Are domain boundaries enriched for slow codons?
-To investigate this question, we will use domain classification by the Structural Classification of Proteins version 2 (SCOP2) \cite{Andreeva2013,scop}. SCOP2 classifies domains using directed acyclic graphs (DAGs) independently for  167547
-\cite{Andreeva2013}\cite{scop}
+To investigate this question, we will use domain classification by the Structural Classification of Proteins version 2 (SCOP2) \citep{Andreeva2013,scop}. As a manually curated database, SCOP2 is very reliable for domain assignment. Although we admit that its coverage is limited (167,547 domains in 59,514 protein structures, about $62\%$ of the PDB), we argue that will still result in sufficiently large data sets.
+
+Using the intersection of SCOP and the data sets described above, we will calculate codon usage bias near and apart from domain boundaries, using windows of 0, 2, 5, 8, and 12 residues from the domain boundary positions. We will then apply a Mantel--Haenszel test to determine significance.
+
+\textbf{Preliminary data:} The research by \citet{Gu2004,Oresic2003} showed an enrichment, though \citet{Saunders2010} found no statistically significant difference. Because all three studies used different methods, the work by Saunders et al. did not supersed the results by Gu et al. and Oresic et al; rather, there is still evidence that a signifant correlation exists.
 
 \item \textbf{Structural complexity and knotting}
-\citep{Lai2012,Virnau2006}
-\item \textbf{Solvent accessibility and oligomeric assembly}
 
-\cite{bryngelson1995funnels}
+Due to the complexity of the energy funnels for the folding of many proteins \citep{bryngelson1995funnels,Onuchic2004}, we hypothesize that proteins with complex tertiary structures are enriched for slow codons. In particular, we hypothesize that residues with more interactions with other residues in a protein are more likely to be encoded for by slow codons, and that proteins with more self-interactions---that is, have more interactions to overcome during the folding process---are enriched for slow codons.
+
+We also conjecture that knotted proteins are enriched for slow codons, and that codon usage bias is inversely correlated with the complexity of the knot. To investigate these hypotheses, we will identify knots using the existing algorithms by \citet{Lai2012,Virnau2006}. Although neither algorithm can detect all knots, we argue that this is sufficient for our purposes.
+
+Knots are classified up to isomorphism by the Jones polynomial, a knot invariant that revolutionized knot theory in part because it is easy to compute. It is defined in terms of a projection $D$ of a knot $K$ by:\\
+\begin{equation}
+X(K) = (-A^3)^{-w(K)}\langle L \rangle
+\end{equation}
+where $w(K)$ is the writhe of $K$.
+
+The result of the computation is a Laurent polynomial that uniquely identifies the knot. Moreover, the number of terms in the Laurent polynomial and its coefficients can be used to define a complexity $\xi(K)$ of the knot. We hypothesize that the knot complexity $\xi$ is associated with the CAI of a gene.
+
+\textbf{Preliminary data:} Using the same data set of 437 S. cerevisiae genes, we investigated the correlation between codon usage bias and two simple measures of structural complexity:
+\begin{enumerate}[a)]
+\item Sequence length
+\item The average squared distance between all residues:\\
+\begin{equation}
+\displaystyle \frac{1}{n^2} \sqrt{\displaystyle \sum_{R \in A} \sum_{S \in A} ||R - S||_2^2 }
+\end{equation}
+where $A$ is a single protein, and $||R - S||_2$ is the two-norm of the difference between the vectors corresponding to residues $R$ and $S$.
+\end{enumerate}
+\todo{Fill in when run finishes [Douglas]}
+
+In the case of structural complexity, we are interested in statistical associations that are potentially nonlinear. For this purpose we will use the Hilbert--Schmidt norm \cite{Song2012} \cite{Song2012a} \todo{Finish this paragraph [Douglas]} 
+
+
+%\item \textbf{Solvent accessibility and oligomeric assembly}
+
+%\cite{bryngelson1995funnels}
+
 
 \end{enumerate}
 
-\subsubsection{Determination of causation}
-Ultimately, we are interested in causation related to codon usage bias. The analyses described above are independently useful, both for novel findings and verification of previous results. While we argue that such results are interesting, biologically relavent, and warrant further investigation, they may indicate only indirect correlations. It is entirely possible for one variable to account for another in whole or in part; for example, domain boundaries may be enriched for slow codons only because they contain more strands than helices, or that solvent accessibility around domain boundaries may be the more fundamental explanation.
+%The determination of causal relationships from correlation data consists of two tasks:
+%\begin{enumerate}
+%\item The removal of indirect correlations, and
+%\item The assignment of a directions to each relationship
+%\end{enumerate}
 
-The determination of causal relationships from correlation data consists of two tasks:
-\begin{enumerate}
-\item The removal of indirect correlations, and
-\item The assignment of a directions to each relationship
-\end{enumerate}
-To formulate these two tasks concretely, we will model the entire problem as a Markov Random Field.
+%To address the first task, correlations will be analyzed again while controlling for the effects of other variables. Statistical association will be measured using the Hilbert--Schmidt norm \cite{Song2012}
 
-\cite{Song2012}\cite{Song2012a}
- 
-\subsubsection{Development of pipeline}
+%Directionality will be determined manually. \todo{Uh. What?}
+
+%To formulate these two tasks concretely, we will model the entire problem as a Markov Random Field.
+
+
+
+%\subsubsection{Mathematical model}
+
+
+\subsubsection{Benchmarking}
+\todo{Does this go under benchmarking? [Robin]}
+Many proteins will be examined over a number of species. While our preliminary analysis has been performed in approximately 500 yeast proteins, we hope to analyze over 10,000 human proteins in hopes of maximizing sample size.
+
+% Douglas: I moved this stuff
+%\subsubsection{Data sets}
+%Domain information will be obtained from the Structural Classification of Proteins (SCOP) database \citep{scop}.
 
 \subsubsection{Analysis of accuracy}
-
+\todo{Where does this go? ---Douglas [Robin]}
+Codon usage bias will be examined on domain boundary regions and non-boundary regions, and the overall CAI value will be compared across these regions. If a significant difference in CAI across secondary structure features is found, the hypothesis will be supported.
 \cite{Liu:2011p8245}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Assessment of accuracy %
-%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Assessment of accuracy}
 
 %%%%%%%%%
 % Aim 2 %
 %%%%%%%%%
 \subsection{Aim 2}
+We also aim to examine existing proteins that have been demonstrated to be affected by the removal of slow codons, and characterize in what circumstances a protein could be reasonably assumed to require slow codons for normal function.
 
+We will run our analysis on species-independent protein families that contain at least one protein shown experimentally to require slow codons. We will complement our structural analysis with a phylogenetic examination of conserved regions to see if the bias towards slow codons is strictly evolutionarily enforced or if it is an isolated development in some species.
 %%%%%%%%%
 % Aim 3 %
 %%%%%%%%%
