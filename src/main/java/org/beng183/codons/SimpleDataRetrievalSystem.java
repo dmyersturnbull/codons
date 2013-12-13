@@ -35,7 +35,7 @@ import org.biojava3.core.sequence.io.FastaReaderHelper;
  */
 public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 
-	private static class ParameterNameValue {
+	static class ParameterNameValue {
 		private final String name;
 		private final String value;
 
@@ -54,7 +54,7 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 	private static final String UNIPROT_SERVER = "http://www.uniprot.org/";
 	private static final String ENTREZ_EFETCH_URL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&rettype=fasta&retmode=text&id=";
 
-	private static String run(String tool, ParameterNameValue[] params) throws LoadException {
+	static String run(String tool, ParameterNameValue[] params) throws LoadException {
 
 		StringBuilder message = new StringBuilder("[");
 		for (int i = 0; i < params.length; i++) {
@@ -168,36 +168,11 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 			if (ans != null) return ans;
 		}
 
-		String uniProtIdData = run("mapping", new ParameterNameValue[] { new ParameterNameValue("from", "P_ENTREZGENEID"),
-				new ParameterNameValue("to", "ID"), new ParameterNameValue("format", "tab"),
-				new ParameterNameValue("query", name) });
-		String uniProtId = parse(uniProtIdData);
-		String refseqData = run("mapping", new ParameterNameValue[] { new ParameterNameValue("from", "ACC+ID"),
-				new ParameterNameValue("to", "REFSEQ_NT_ID"), new ParameterNameValue("format", "tab"),
-				new ParameterNameValue("query", uniProtId) });
-		String id = parse(refseqData);
+		String uniProtId = getUniProtIdFromEntrezId(name);
+		String id = getRefSeqIdFromUniProtId(uniProtId);
 
-		// http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=34577062,24475906&rettype=fasta&retmode=text
-		URL url;
-		try {
-			url = new URL(ENTREZ_EFETCH_URL + id);
-		} catch (MalformedURLException e) {
-			throw new LoadException("Couldn't query for gene sequence for the gene with name " + name, e);
-		}
-
-		LinkedHashMap<String, DNASequence> sequences = new LinkedHashMap<>();
-		InputStream stream;
-		try {
-			stream = url.openStream();
-		} catch (IOException e) {
-			throw new LoadException("Couldn't load URL " + url + " for gene with name " + name, e);
-		}
-
-		try {
-			sequences = FastaReaderHelper.readFastaDNASequence(stream);
-		} catch (Exception e) {
-			throw new LoadException("Couldn't load gene sequence for the gene with name " + name, e);
-		}
+		LinkedHashMap<String, DNASequence> sequences = downloadSequences(id, name);
+		
 		Iterator<DNASequence> iterator = sequences.values().iterator();
 		if (!iterator.hasNext()) throw new LoadException("Did not find a sequence for gene with name " + name);
 		String sequence = iterator.next().getSequenceAsString();
@@ -205,19 +180,60 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 		logger.info("Found sequence of length " + sequence.length() + " for gene " + name);
 		return sequence;
 	}
+	
+	static LinkedHashMap<String, DNASequence> downloadSequences(String refSeqId, String geneName) throws LoadException {
 
-	private String getPdbIdFromEntrezId(String name) throws LoadException {
-		if (geneToPdbId.get(name) != null) return geneToPdbId.get(name);
+		// http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=34577062,24475906&rettype=fasta&retmode=text
+		URL url;
+		try {
+			url = new URL(ENTREZ_EFETCH_URL + refSeqId);
+		} catch (MalformedURLException e) {
+			throw new LoadException("Couldn't query for gene sequence for the gene with name " + geneName, e);
+		}
+
+		LinkedHashMap<String, DNASequence> sequences = new LinkedHashMap<>();
+		InputStream stream;
+		try {
+			stream = url.openStream();
+		} catch (IOException e) {
+			throw new LoadException("Couldn't load URL " + url + " for gene with name " + geneName, e);
+		}
+
+		try {
+			sequences = FastaReaderHelper.readFastaDNASequence(stream);
+		} catch (Exception e) {
+			throw new LoadException("Couldn't load gene sequence for the gene with name " + geneName, e);
+		}
+		
+		return sequences;
+		
+	}
+
+	static String getUniProtIdFromEntrezId(String entrezId) throws LoadException {
 		String uniProtIdData = run("mapping", new ParameterNameValue[] { new ParameterNameValue("from", "P_ENTREZGENEID"),
-				new ParameterNameValue("to", "ID"), new ParameterNameValue("format", "tab"),
-				new ParameterNameValue("query", name) });
+				new ParameterNameValue("to", "ACC"), new ParameterNameValue("format", "tab"),
+				new ParameterNameValue("query", entrezId) });
 		String uniProtId;
 		try {
 			uniProtId = parse(uniProtIdData);
 		} catch (LoadException e) {
-			throw new LoadException("Couldn't get UniProt Id from [" + uniProtIdData + "] for gene " + name);
+			throw new LoadException("Couldn't get UniProt Id from [" + uniProtIdData + "] for gene " + entrezId);
 		}
-		String pdbIdData = run("mapping", new ParameterNameValue[] { new ParameterNameValue("from", "ACC+ID"),
+		return uniProtId;
+	}
+
+	static String getRefSeqIdFromUniProtId(String uniProtId) throws LoadException {
+		String refseqData = SimpleDataRetrievalSystem.run("mapping", new ParameterNameValue[] { new ParameterNameValue("from", "ACC+ID"),
+				new ParameterNameValue("to", "REFSEQ_NT_ID"), new ParameterNameValue("format", "tab"),
+				new ParameterNameValue("query", uniProtId) });
+		String id = SimpleDataRetrievalSystem.parse(refseqData);
+		return id;
+	}
+	
+	private String getPdbIdFromEntrezId(String name) throws LoadException {
+		if (geneToPdbId.get(name) != null) return geneToPdbId.get(name);
+		String uniProtId = getUniProtIdFromEntrezId(name);
+		String pdbIdData = run("mapping", new ParameterNameValue[] { new ParameterNameValue("from", name),
 				new ParameterNameValue("to", "PDB_ID"), new ParameterNameValue("format", "tab"),
 				new ParameterNameValue("query", uniProtId) });
 		String pdbId;
@@ -230,7 +246,7 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 		return pdbId;
 	}
 
-	private String parse(String data) throws LoadException {
+	static String parse(String data) throws LoadException {
 		try {
 			return data.split(System.getProperty("line.separator"))[1].split("\t")[1];
 		} catch (RuntimeException e) {
@@ -242,14 +258,14 @@ public class SimpleDataRetrievalSystem implements DataRetrievalSystem {
 	public Structure getStructureFromGeneName(String name) throws LoadException {
 		logger.info("Finding PDB structure for gene " + name + "...");
 		String pdbId = getPdbIdFromEntrezId(name);
-		if (pdbId == null) throw new LoadException("Gene " + name + " not found");
+		if (pdbId == null) throw new LoadException("PDB Id for " + name + " not found");
 		Structure structure = null;
 		try {
 			structure = cache.getStructure(pdbId);
 		} catch (IOException | StructureException e) {
 			throw new LoadException("Couldn't load structure from PDB Id" + pdbId, e);
 		}
-		logger.info("Found PDB Id " + structure.getPDBCode() + " for gene " + name);
+		logger.info("Found PDB Id " + structure.getPDBHeader().getIdCode() + " for gene " + name);
 		return structure;
 	}
 

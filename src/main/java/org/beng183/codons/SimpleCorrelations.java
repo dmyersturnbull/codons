@@ -4,17 +4,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.util.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -50,23 +46,41 @@ import org.biojava.bio.structure.secstruc.SecStrucType;
 public class SimpleCorrelations {
 
 	public static void main(String[] args) throws AnalysisException, IOException {
+		
 		if (args.length != 1) {
 			System.err.println("Usage: " + SimpleCorrelations.class.getSimpleName() + " list-of-ids-file");
 			return;
 		}
+		
 		logger.info("Initializing data retrieval system");
-		DataRetrievalSystem retrieval = new SimpleDataRetrievalSystem();
+		DataRetrievalSystem retrieval = new SiftsDataRetrievalSystem();
+		
 		logger.info("Initializing codon weight system");
 		CodonWeightSystem weighter = SimpleCodonWeightSystem.createForSpecies(Species.S_CEREVISIAE);
+		
 		logger.info("Initializing correlations-finder");
 		SimpleCorrelations corr = new SimpleCorrelations(weighter, retrieval);
+		
 		logger.info("Parsing gene identifiers");
 		corr.setNames(new File(args[0]));
-		logger.info("Evaluating domain boundaries");
-		Evaluation eval = corr.evaluateNearDomainBoundaries(5);
-		System.out.println(eval.getPositiveMeans() + " / " + eval.getNegativeMeans());
+
+		printHeader("domains");
+		Evaluation domains = corr.evaluateNearDomainBoundaries(5);
+		System.out.println(domains);
+
+		printHeader("strands");
+		Evaluation strands = corr.evaluateWithinBetaSheets();
+		System.out.println(strands);
+
+		printHeader("length");
+		RealMatrix length = corr.correlateLength();
+		System.out.println(printMatrix(length));
+
+		printHeader("sparseness");
+		RealMatrix sparseness = corr.correlateSparseness();
+		System.out.println(printMatrix(sparseness));
 	}
-	
+
 	/**
 	 * An object that calculates a numerical value from a structure.
 	 * This value can then be correlated against the total codon weight of the sequence.
@@ -81,7 +95,7 @@ public class SimpleCorrelations {
 		 */
 		double calculate(Structure structure, Atom[] ca, String geneticSequence) throws Exception;
 	}
-	
+
 	/**
 	 * A description of the correlation between codon usage bias and a binary variable.
 	 * @author dmyersturnbull
@@ -146,6 +160,13 @@ public class SimpleCorrelations {
 			}
 			return means;
 		}
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("positive: " + getPositiveMeans().getMean() + "; ");
+			sb.append("negative: " + getNegativeMeans().getMean());
+			return sb.toString();
+		}
 	}
 
 	private static final Logger logger = LogManager.getLogger(SimpleCorrelations.class.getName());
@@ -164,7 +185,7 @@ public class SimpleCorrelations {
 	 * Correlates codon usage bias with sequence length.
 	 * @see #correlate(StructureCalculator)
 	 */
-	public PearsonsCorrelation correlateLength() throws AnalysisException {
+	public RealMatrix correlateLength() throws AnalysisException {
 		return correlate(new StructureCalculator() {
 			@Override
 			public double calculate(Structure structure, Atom[] ca, String geneticSequence) throws Exception {
@@ -181,7 +202,7 @@ public class SimpleCorrelations {
 	 * This should give an estimate of inverse density, without normalization for length.
 	 * @see #correlate(StructureCalculator)
 	 */
-	public PearsonsCorrelation correlateSparseness() throws AnalysisException {
+	public RealMatrix correlateSparseness() throws AnalysisException {
 		return correlate(new StructureCalculator() {
 			@Override
 			public double calculate(Structure structure, Atom[] ca, String geneticSequence) throws Exception {
@@ -194,33 +215,38 @@ public class SimpleCorrelations {
 	 * Correlates the total codon usage bias of each structure against some other value, as calculated by {@code calculator}.
 	 * @return A PearsonsCorrelation object with codon usage bias in the first column and the calculated value in the second
 	 */
-	public PearsonsCorrelation correlate(StructureCalculator calculator) throws AnalysisException {
+	public RealMatrix correlate(StructureCalculator calculator) throws AnalysisException {
 
 		double[] calculatedValue = new double[names.size()];
 		double[] weights = new double[names.size()];
 
 		for (int x = 0; x < names.size(); x++) {
-			
+
 			String name = names.get(x);
-			
+
 			try {
 
 				String geneticSequence = retrieval.getGeneticSequenceFromName(name);
 				Structure structure = retrieval.getStructureFromGeneName(name);
 				Atom[] ca = StructureTools.getAtomCAArray(structure);
+
+				if (ca.length != geneticSequence.length() / 3) {
+					logger.warn(name + " has " + ca.length + " C-α atoms but " + (geneticSequence.length()/3) + " codons");
+				}
+
 				calculatedValue[x] = calculator.calculate(structure, ca, geneticSequence);
-				weights[x] = sumWeight(ca, geneticSequence);
+				weights[x] = sumWeight(geneticSequence);
 
 			} catch (Exception e) {
 				logger.error(e);
+				e.printStackTrace();
 			}
 		}
 
-		RealMatrix matrix = new BlockRealMatrix(names.size(), names.size());
+		RealMatrix matrix = new BlockRealMatrix(names.size(), 2);
 		matrix.setColumn(0, calculatedValue);
 		matrix.setColumn(1, weights);
-		PearsonsCorrelation corr = new PearsonsCorrelation(matrix);
-		return corr;
+		return matrix;
 	}
 
 	/**
@@ -238,7 +264,7 @@ public class SimpleCorrelations {
 		if (names == null) {
 			throw new IllegalArgumentException("Must set names first");
 		}
-		
+
 		Evaluation eval = new Evaluation();
 
 		for (String name : names) {
@@ -251,6 +277,11 @@ public class SimpleCorrelations {
 				String geneticSequence = retrieval.getGeneticSequenceFromName(name);
 				Structure structure = retrieval.getStructureFromGeneName(name);
 				Atom[] ca = StructureTools.getAtomCAArray(structure);
+
+				if (ca.length != geneticSequence.length() / 3) {
+					throw new AnalysisException("Failed on gene " + name + " because it has " + ca.length + " C-α atoms but " + (geneticSequence.length()/3) + " codons");
+				}
+
 				List<ScopDomain> domains = retrieval.getDomainsFromGeneName(name);
 				if (domains.size() < 2) {
 					logger.info("Skipping " + name + " because only " + domains.size() + " domain(s) were found");
@@ -278,7 +309,7 @@ public class SimpleCorrelations {
 							}
 						}
 					}
-					
+
 				}
 
 				logger.info("For gene " + name + ": bias near boundaries is " + String.format("%1$.4f", positive.getMean()) + ", bias outside is " + String.format("%1$.4f", negative.getMean()));
@@ -286,6 +317,7 @@ public class SimpleCorrelations {
 
 			} catch (Exception e) {
 				logger.error(e);
+				e.printStackTrace();
 			}
 		}
 		return eval;
@@ -346,6 +378,10 @@ public class SimpleCorrelations {
 				Structure structure = retrieval.getStructureFromGeneName(name);
 				Atom[] ca = StructureTools.getAtomCAArray(structure);
 
+				if (ca.length != geneticSequence.length() / 3) {
+					throw new AnalysisException("Failed on gene " + name + " (" + structure.getPDBHeader().getIdCode() + ") because it has " + ca.length + " C-α atoms but " + (geneticSequence.length()/3) + " codons");
+				}
+
 				SecStruc ss = new SecStruc();
 				try {
 					ss.assign(structure);
@@ -362,7 +398,12 @@ public class SimpleCorrelations {
 				for (int i = 0; i < ca.length; i++) {
 					Atom atom = ca[i];
 					Group group = atom.getGroup();
-					double codonWeight = weighter.getCodonWeight(getCodon(geneticSequence, i));
+					String codon = getCodon(geneticSequence, i);
+					if (codon == null) {
+						logger.warn("Codon #" + i + " does not exist");
+						continue;
+					}
+					double codonWeight = weighter.getCodonWeight(codon);
 					if (group != null) {
 						ResidueNumber residueNumber = group.getResidueNumber();
 						SecStrucType type = map.get(residueNumber).getSecStruc();
@@ -378,69 +419,30 @@ public class SimpleCorrelations {
 
 			} catch (Exception e) {
 				logger.error(e);
+				e.printStackTrace();
 			}
 		}
 		return eval;
 	}
 
-	/**
-	 * Provides a rough alignment-free metric for the similarity between two
-	 * superimposed structures.
-	 * 
-	 * The average distance from each atom in {@code ca1} to the closest atom in {@code ca2}.
-	 * 
-	 * Copied from RotationOrderDetector of rcsb-symmetry.
-	 *
-	 * @param ca1 first structure
-	 * @param ca2 second structure
-	 * @return the average distance to the closest atom
-	 * @throws StructureException if an error occurs finding distances between atoms
-	 * @author sbliven
-	 */
 	private double superpositionDistance(Atom[] ca1, Atom[] ca2) throws StructureException {
-
-		// Store the closest distance yet found
-		double[] bestDist1 = new double[ca1.length];
-		double[] bestDist2 = new double[ca2.length];
-		Arrays.fill(bestDist1, Double.POSITIVE_INFINITY);
-		Arrays.fill(bestDist2, Double.POSITIVE_INFINITY);
-
-		for(int i=0;i<ca1.length;i++) {
-			for(int j=0;j<ca2.length;j++) {
-				double dist = Calc.getDistanceFast(ca1[i], ca2[j]);
-				if( dist < bestDist1[i]) {
-					bestDist1[i] = dist;
-				}
-				if( dist < bestDist2[j]) {
-					bestDist2[j] = dist;
-				}
+		double total = 0;
+		for (int i = 0; i < ca1.length; i++) {
+			for (int j = 0; j < ca2.length; j++) {
+				total += Calc.getDistanceFast(ca1[i], ca2[j]);
 			}
 		}
-
-		double total = 0;
-		for(int i=0;i<ca1.length;i++) {
-			total += Math.sqrt(bestDist1[i]);
-		}
-		for(int j=0;j<ca2.length;j++) {
-			total += Math.sqrt(bestDist2[j]);
-		}
-
-		double dist = total/(ca1.length+ca2.length);
-		return dist;
+		return Math.sqrt(total) / ca1.length;
 	}
-	
+
 	/**
 	 * Calculates the sum of the codon weights in the sequence.
 	 */
-	private double sumWeight(Atom[] ca, String geneticSequence) {
+	private double sumWeight(String geneticSequence) {
 		double weightSum = 0;
-		for (int i = 0; i < ca.length; i++) {
-			Atom atom = ca[i];
-			Group group = atom.getGroup();
-			if (group != null) {
-				double codonWeight = weighter.getCodonWeight(getCodon(geneticSequence, i));
-				weightSum += codonWeight;
-			}
+		for (int i = 0; i < geneticSequence.length() / 3; i++) {
+			double codonWeight = weighter.getCodonWeight(getCodon(geneticSequence, i));
+			weightSum += codonWeight;
 		}
 		return weightSum;
 	}
@@ -449,7 +451,34 @@ public class SimpleCorrelations {
 	 * Returns the {@code nRead}th codon’s 3-letter code.
 	 */
 	private String getCodon(String geneticSequence, int nReads) {
+		if (geneticSequence.length() < (nReads + 1) * 3) {
+			return null;
+		}
 		return geneticSequence.substring(nReads * 3, (nReads + 1) * 3);
+	}
+
+	private static String printMatrix(RealMatrix matrix) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < matrix.getRowDimension(); i++) {
+			for (int j = 0; j < matrix.getColumnDimension(); j++) {
+				sb.append((String.format("%1$6.4f", matrix.getEntry(i, j))));
+			}
+			sb.append(System.getProperty("line.separator"));
+		}
+		return sb.toString();
+	}
+	
+	private static void printHeader(String name) {
+		System.out.println(repeat(System.getProperty("line.separator"), 4));
+		System.out.println(repeat("-", 80));
+		System.out.println(repeat("-", 40 - name.length()/2) + name + repeat("-", 40 - name.length()/2));
+		System.out.println(repeat("-", 80));
+	}
+	
+	private static String repeat(String s, int x) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < x; i++) sb.append(s);
+		return sb.toString();
 	}
 
 }
