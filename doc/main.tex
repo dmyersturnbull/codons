@@ -198,6 +198,14 @@ In addition, the previous studies were partly unsuccessful in establishing even 
 
 To map between protein structures and genetic sequences, we will use RefSeq [] and PDBSWS by \cite{Martin2005}.
 
+We will apply these methods to 5--10 species-dependent data sets, including eukaryotes, invertibrates, and Homo sapiens. We will necessarily limit the data sets to contain only genes annotated with structures in the Protein Data Bank (PDB) \citep{pdb}.
+
+The content of databases that permit public deposition of entries, such as the NCBI and the PDB, are significantly biased toward sequences and structures that are of experimental interest. To control for such bias, we will perform two normalization steps prior to analysis:
+\begin{enumerate}[a)]
+\item Perform sequence clustering
+\end{enumerate}
+
+
 \subsubsection{Hypotheses}
 We are currently interested in several hypotheses and open questions:
 \begin{enumerate}
@@ -206,15 +214,15 @@ Are particular secondary structural elements (SSEs) enriched for slow codons? Ar
 
 To investigate this hypothesis, we will use Define Secondary Structure of Proteins (DSSP) [,] to identify putative SSEs. Although DSSP is currently outperformed in accuracy by sophisticated machine learning methods, the use of machine learning algorithms such as PROTEUS presents significant pitfalls in performing statistical analysis because decisions by the classifier depend on the training data, and individual classification decisions are unstable subject to arbitrary bounds. Because our methodology depends so heavily on such analysis to improve overall sensitivity, we consider this loss of statistical rigor unacceptable.
 
-We will first attempt to verify the results of \citet{Saunders2010} by duplicating their approach. Specifically, we will calculate the distribution of codon usage bias within helices, strands, and coils. We will apply this method to 5--10 species-dependent data sets, including eukaryotes, invertibrates, and Homo sapiens. We will then apply a Mantel--Haenszel and a $\chi^2$-test to determine significance between the categories. Secondly, we select 2--5 large data sets (at least 2,000 genes each), and expand the categories to also include, at a minimum, $3_{10}$-helices, $\beta$-helices, and $\pi$-helices. We will also distinguish between $\beta$-sheets and isolated $\beta$-strands. We will then determine significance using the same statistical techniques.
+We will first attempt to verify the results of \citet{Saunders2010} by duplicating their approach. Specifically, we will calculate the distribution of codon usage bias within helices, strands, and coils.We will apply a Mantel--Haenszel and a $\chi^2$-test to determine significance between the categories. Secondly, we select 2--5 large data sets (at least 2,000 genes each), and expand the categories to also include, at a minimum, $3_{10}$-helices, $\beta$-helices, and $\pi$-helices. We will also distinguish between $\beta$-sheets and isolated $\beta$-strands. We will then determine significance using the same statistical techniques.
 
 To address the second part of this question, we will calculate codon usage bias around the transitions between SSEs, using windows of 0, 1, 2, 4, and 6 residues.
 
-\textbf{Preliminary data:} In addition to the work by \citet{Saunders2010,Oresic2003,Gu2003,Thanaraj1996a}, we  investigated the hypothesis that strands are enriched for slow codons on a data set of 1,000 \todo{fix this description of the data} genes, much larger than the data sets of any previous works. The results showed that \todo{something}.
+\textbf{Preliminary data:} In addition to the work by \citet{Saunders2010,Oresic2003,Gu2003,Thanaraj1996a}, we  investigated the hypothesis that strands are enriched for slow codons on a novel data set of 437 S. cerevisiae genes annotated by sturctures in the PDB. The results showed that \todo{something}.
 
 \item \textbf{Domain boundaries}
 Are domain boundaries enriched for slow codons?
-To investigate this question, 
+To investigate this question, we will use domain classification by the Structural Classification of Proteins version 2 (SCOP2) \cite{Andreeva2013,scop}. SCOP2 classifies domains using directed acyclic graphs (DAGs) independently for  167547
 \cite{Andreeva2013}\cite{scop}
 
 \item \textbf{Structural complexity and knotting}
