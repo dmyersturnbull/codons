@@ -151,7 +151,7 @@ There is also substantial evidence that codon usage bias is also fundamentally l
 
 \subsubsection{Effects on protein structure}
 Because slow codons can cause pauses in translation, it has been suggested that synonymous codon usage can influence protein folding, leading to different folded states for transcripts with differing synonymous codon usage \cite{Komar2009,Zhang2009,Buchan2007,Crombie1994}.
-Several studies have found that codon usage bias is correlated to protein structure \citep{Saunders2010,Biro2006,Adzhubei1996,Gu2003}, including protein secondary structure \citep{Oresic2003,Gu2003,Thanaraj1996a} and domain organization \citep{Gu2004,Oresic2003}.
+Several studies have found that codon usage bias is correlated to protein structure \citep{Saunders2010,Biro2006,Adzhubei1996,Gu2003}, including protein secondary structure \citep{Saunders2010,Oresic2003,Gu2003,Thanaraj1996a} and domain organization \citep{Gu2004,Oresic2003}.
 
 %Deana1998 showed regulatory effect
 The first known effect of synonymous mutations on protein structure came from \citet{Crombie1994}, who replaced 10 consecutive slow codons with fast codons in the E. coli TRP3 protein. Doing so reduced the native enzymatic activity by 1.5-fold. Still more surprising was the finding by \citet{Sarfaty2007} that a silent polymorphism in the mammalian multi-drug-resistant gene MDR1 altered its folded state and decreased its substrate specificity, without affecting its expression. A recent study by \citet{Zhou2013} found a similar result for a natural mutation in the clinically important circadian rhythm protein FRQ. These studies hint to the existance of more examples of such effects. Furthermore, we argue that additional such cases are likely to be clinically important. 
@@ -194,21 +194,54 @@ In addition, the previous studies were partly unsuccessful in establishing even 
 %%%%%%%%%
 \subsection{Aim 1}
 
-\subsubsection{Hypotheses}
-We are currently interested in several hypotheses:
-\begin{enumerate}
-\item Are particular secondary structural elements (SSEs) enriched for slow codons?
-\end{enumerate}
-
-\subsubsection{Mathematical model}
-
-\subsubsection{Pipeline}
-
-\subsubsection{Benchmarking}
-
-\subsubsection{Investigation}
+\subsubsection{Data sets}
 
 To map between protein structures and genetic sequences, we will use RefSeq [] and PDBSWS by \cite{Martin2005}.
+
+\subsubsection{Hypotheses}
+We are currently interested in several hypotheses and open questions:
+\begin{enumerate}
+\item \textbf{Secondary structure}
+Are particular secondary structural elements (SSEs) enriched for slow codons? Are the transitions between SSEs, in agreement with \citet{Saunders2010}, enriched for slow codons?
+
+To investigate this hypothesis, we will use Define Secondary Structure of Proteins (DSSP) [,] to identify putative SSEs. Although DSSP is currently outperformed in accuracy by sophisticated machine learning methods, the use of machine learning algorithms such as PROTEUS presents significant pitfalls in performing statistical analysis because decisions by the classifier depend on the training data, and individual classification decisions are unstable subject to arbitrary bounds. Because our methodology depends so heavily on such analysis to improve overall sensitivity, we consider this loss of statistical rigor unacceptable.
+
+We will first attempt to verify the results of \citet{Saunders2010} by duplicating their approach. Specifically, we will calculate the distribution of codon usage bias within helices, strands, and coils. We will apply this method to 5--10 species-dependent data sets, including eukaryotes, invertibrates, and Homo sapiens. We will then apply a Mantel--Haenszel and a $\chi^2$-test to determine significance between the categories. Secondly, we select 2--5 large data sets (at least 2,000 genes each), and expand the categories to also include, at a minimum, $3_{10}$-helices, $\beta$-helices, and $\pi$-helices. We will also distinguish between $\beta$-sheets and isolated $\beta$-strands. We will then determine significance using the same statistical techniques.
+
+To address the second part of this question, we will calculate codon usage bias around the transitions between SSEs, using windows of 0, 1, 2, 4, and 6 residues.
+
+\textbf{Preliminary data:} In addition to the work by \citet{Saunders2010,Oresic2003,Gu2003,Thanaraj1996a}, we  investigated the hypothesis that strands are enriched for slow codons on a data set of 1,000 \todo{fix this description of the data} genes, much larger than the data sets of any previous works. The results showed that \todo{something}.
+
+\item \textbf{Domain boundaries}
+Are domain boundaries enriched for slow codons?
+To investigate this question, 
+\cite{Andreeva2013}\cite{scop}
+
+\item \textbf{Structural complexity and knotting}
+\citep{Lai2012,Virnau2006}
+\item \textbf{Solvent accessibility and oligomeric assembly}
+
+\cite{bryngelson1995funnels}
+
+\end{enumerate}
+
+\subsubsection{Determination of causation}
+Ultimately, we are interested in causation related to codon usage bias. The analyses described above are independently useful, both for novel findings and verification of previous results. While we argue that such results are interesting, biologically relavent, and warrant further investigation, they may indicate only indirect correlations. It is entirely possible for one variable to account for another in whole or in part; for example, domain boundaries may be enriched for slow codons only because they contain more strands than helices, or that solvent accessibility around domain boundaries may be the more fundamental explanation.
+
+The determination of causal relationships from correlation data consists of two tasks:
+\begin{enumerate}
+\item The removal of indirect correlations, and
+\item The assignment of a directions to each relationship
+\end{enumerate}
+To formulate these two tasks concretely, we will model the entire problem as a Markov Random Field.
+
+\cite{Song2012}\cite{Song2012a}
+ 
+\subsubsection{Development of pipeline}
+
+\subsubsection{Analysis of accuracy}
+
+\cite{Liu:2011p8245}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 % Assessment of accuracy %
