@@ -175,7 +175,7 @@ No studies attempting to investigate causal relationships between codon usage bi
 
 In addition, the previous studies were partly unsuccessful in establishing even statistical correlations. The investigation by \citet{Saunders2010}, which is the most recent, interrogated differences in codon usage  within helices, strands, and coils by applying both Mantel--Haenszel statistics and a $\chi^2$-test. They found few significant differences between the three secondary structural types, but did find a significant decrease in codon usage bias near the transitions between secondary structural elements. They also investigated the hypothesis that slow codons are frequent around domain boundaries; the results in this case were negative. However, these studies relied on simple statistical techniques that lack the power necessary to find statistical associations for weaker signals.
 
-\todo{Finish}
+Immense progress has been made in both the quality and quantity of information contained within bioinformatics databases within the past few years, making analyses of codon usage across thousands or more proteins possible. Examining larger sample sizes enables the study of family or activity based codon bias as well as allowing for a more robust statistical analysis when compared with previous studies where fewer than 300 proteins were examined.
 
 %%%%%%%%%%%%
 % Approach %
@@ -268,7 +268,7 @@ where $A$ is a single protein, and $||R - S||_2$ is the two-norm of the differen
 \end{enumerate}
 \todo{Fill in when run finishes [Douglas]}
 
-In the case of structural complexity, we are interested in statistical associations that are potentially nonlinear. For this purpose we will use the Hilbert--Schmidt Independence Criterion (HSIC) \cite{Song2012} to identify statistical associations, both linear and nonlinear.
+In the case of structural complexity, we are interested in statistical associations that are potentially nonlinear. For this purpose we will use the Hilbert--Schmidt Independence Criterion (HSIC) \cite{Gretton2005} to identify statistical associations, both linear and nonlinear.
 
 The HSIC is a statistical test defined using a generalization of the Frobenius norm for linear operators called
 
@@ -279,16 +279,15 @@ The Hilbert--Schmidt (HS) norm is an operator norm defined for an arbitrary oper
 ||C||_{HS}^2 = \displaystyle \sum_{i,j} \langle C \nu_i, \mu_j \rangle_F^2
 \end{equation}
 where $\nu$ and $\mu$ are orthonormal bases of $F$ and $G$. The HS norm is extremely similar to the Frobenius norm for matrices. However, the generalization permits its use for arbitrary operators rather than only linear operators (specifically, the only requisite is that $F$ and $G$ are Hilbert spaces).
-A cross-covariance operator $C_{xy}$ is then defined [], and the HSIC is defined as:
+A cross-covariance operator $C_{xy}$ is then defined, and the HSIC is defined as:
 \begin{equation}
 HSIC(p_{xy}, F, G) := ||C_{x,y}||_{HS}^2
 \end{equation}
+where $p$ is a probability measure.
 \cite{Song2012}
+The HSIC is a measure of statistical dependence: the higher the HSIC between $F$ and $G$, the greater the dependence between $F$ and $G$. Moreover, the HSIC has been proved to be a measure of arbitrary statistical dependence \citet{Song2012a}. Thus the advantage of this method is that it permits the determination of nonlinear associations without the use of a kernel trick or artificial regularization. This should allow us to identify potential relationships between protein complexity and codon usage bias in a manner that is sensitive and statistically robust, and that does not depend on an arbitrary selection of kernels or regularization terms.
 
-The advantage of this method is that it permits the determination of nonlinear associations without the use of a kernel trick or artificial regularization. This should allow us to identify potential relationships between protein complexity and codon usage bias in a manner that is sensitive and statistically robust, and that does not depend on an arbitrary selection of kernels or regularization terms.
-
-\cite{Song2012a} \todo{Finish this paragraph [Douglas]} 
-
+The approach of \citet{Song2012a} for feature selection and optimization of the HSIC was shown to have good results, and we will abide by this procedure.
 
 %\item \textbf{Solvent accessibility and oligomeric assembly}
 
@@ -313,17 +312,9 @@ The advantage of this method is that it permits the determination of nonlinear a
 
 %\subsubsection{Mathematical model}
 
-
-\subsubsection{Benchmarking}
-\todo{Does this go under benchmarking? [Robin]}
+\subsubsection{Analysis of accuracy}
 Many proteins will be examined over a number of species. While our preliminary analysis has been performed in approximately 500 yeast proteins, we hope to analyze over 10,000 human proteins in hopes of maximizing sample size.
 
-% Douglas: I moved this stuff
-%\subsubsection{Data sets}
-%Domain information will be obtained from the Structural Classification of Proteins (SCOP) database \citep{scop}.
-
-\subsubsection{Analysis of accuracy}
-\todo{Where does this go? ---Douglas [Robin]}
 Codon usage bias will be examined on domain boundary regions and non-boundary regions, and the overall CAI value will be compared across these regions. If a significant difference in CAI across secondary structure features is found, the hypothesis will be supported.
 \cite{Liu:2011p8245}
 
